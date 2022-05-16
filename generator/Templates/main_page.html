@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<p class="main_page_text">
+    <big><i>Subtitles Generator</i></big>
+</p>
+<div class="flex">
+    {% csrf_token %}
+    <form action="{% url 'wav' %}" class="flex-items">
+        <button class="kind_button" type="submit">I already have .wav file</button>
+    </form>
+    <form action="{% url 'another' %}" class="flex-items">
+        <button class="kind_button" type="submit">I have another type of file</button>
+    </form>
+</div>
+{% endblock content %}

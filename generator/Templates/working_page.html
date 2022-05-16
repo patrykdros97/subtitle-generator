@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<p class="selected_page">
+    <big><i>Subtitles Generator</i></big>
+</p>
+<div class="flex">
+    {% csrf_token %}
+    <form id="form-flex" method="POST" action='.' enctype="multipart/form-data" class="dropzone">
+        <input id='file' type="file" name="file" placeholder="Choose file" style="color: #f0ffff;" VALUE="Refresh">
+        <button type="submit" onclick=upload_file();>Upload File</button>
+    </form>
+</div>
+<div>
+
+</div>
+
+{% endblock content %}
