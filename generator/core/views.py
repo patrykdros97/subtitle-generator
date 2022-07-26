@@ -1,56 +1,89 @@
+from urllib import response
 from django.shortcuts import render
-from .forms import UploadMediaFileForm
 from .models import UploadMediaFile
+from .forms import UploadMediaFileForm
 
-import speech_recognition as sr
+import os
 import traceback
+import mimetypes
+from datetime import datetime
 from pydub import AudioSegment
+import speech_recognition as sr
+from googletrans import Translator
+from datetime import datetime,timedelta
 from pydub.silence import split_on_silence
+from django.http.response import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 
-# Create your views here.
-
-def start_page(request, *args, **kwargs):
-    return render(request, 'main_page.html', {})
+def time_calculator(audio: str, seconds:int, microseconds:int=100000) -> str:
+    if isinstance(microseconds, str):
+        len_diff = 6 - len(microseconds)
+        microseconds = microseconds[:6] if len_diff < 0 else microseconds + '0' * len_diff
+    time_obj = datetime.strptime(audio, '%H:%M:%S,%f') + timedelta(seconds=int(seconds),
+                                                                   microseconds=int(f'{int(microseconds):6d}'))
+    return datetime.strftime(time_obj, f'%H:%M:%S,%f')[:-3]
 
 @csrf_exempt
-def wav_files(request, *args, **kwargs):
+def upload_file(request, *args, **kwargs):
     context = {}
     if request.method == 'POST':
         forms = UploadMediaFileForm(request.POST, request.FILES)
         if forms.is_valid():
-            print(request.FILES['file'].size)
-            instance = UploadMediaFile(file=request.FILES['file'])
+
+            instance = UploadMediaFile(file=request.FILES['file'], title=request.FILES['file'].name, uploaded_at=datetime.now())
             instance.save()
+            file = UploadMediaFile.objects.filter(title=request.FILES['file'].name)[0]
+            if request.FILES['file'].name.lower().endswith(('.mp3', '.mp4')):
+                file_to_convert = ''.join(file.file.path.split('.')[:-1]) + '.wav'
+                os.system(f'ffmpeg -i {file.file.path} {file_to_convert}')
+                os.system('y')
+            else:
+                file_to_convert = request.FILES['file']
             context = {'form': forms}
-            handle_uploaded_file(request.FILES['file'])
-        
+            filepath = handle_uploaded_file(file_to_convert)
+            context = {'filepath': filepath}
     return render(request, 'working_page.html', context)
 
-def another_files(request, *args, **kwargs):
-    return render(request, 'working_page.html', {})
-
-def handle_uploaded_file(file):
+def handle_uploaded_file(file, audio_begin:str='00:00:00,500', translator=Translator(), filepath:str='subtitles.txt') -> str:
     r = sr.Recognizer()
     print('Processing hearing file')
     sound = AudioSegment.from_wav(file)
     print('End processing hearing file')
     chunks = split_on_silence(sound,
         # experiment with this value for your target audio file
-        min_silence_len = 500,
+        min_silence_len = 1000,
         # adjust this per requirement
-        silence_thresh = sound.dBFS-14,
+        silence_thresh = sound.dBFS-16,
         # keep the silence for 1 second, adjustable as well
         keep_silence=500,
     )
-    for chunk in chunks:
+    text = ''
+    for chunk_id, chunk in enumerate(chunks, start=1):
         with sr.AudioFile(chunk.export(format="wav")) as source:
-            
+            begin = audio_begin
+            end = time_calculator(begin, *str(chunk.duration_seconds).split('.'))
             audio_listened = r.record(source)
             try:
-                text = r.recognize_google(audio_listened)
-                print(text + '\n')
+                recognize = r.recognize_google(audio_listened)
+                output = translator.translate(text=recognize, dest='pl', src='auto')
+                text += f'{chunk_id}\n{begin} --> {end}\n{output.text}\n\r'
+                print(output.text + '\n')
             except:
                 print(traceback.format_exc())
+            audio_begin = time_calculator(end, seconds=0)
+    #return text
+    with open(filepath, 'w') as file: file.write(text)
+    return filepath
+
+def download_file(request, filepath):
+    path = open(filepath, 'r')
+    # Set the mime type
+    mime_type, _ = mimetypes.guess_type(filepath)
+    # Set the return value of the HttpResponse
+    response = HttpResponse(path, content_type=mime_type)
+    # Set the HTTP header for sending to browser
+    response['Content-Disposition'] = "attachment; filename=%s" % filepath
+    # Return the response value
+    return response
         

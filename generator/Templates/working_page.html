@@ -10,6 +10,14 @@
         <input id='file' type="file" name="file" placeholder="Choose file" style="color: #f0ffff;" VALUE="Refresh">
         <button type="submit" onclick=upload_file();>Upload File</button>
     </form>
+{% if filepath %}
+<div class="flex">
+    <p>
+        <a href="download/{{filepath}}">Download TXT</a>
+    </p>
+</div>
+
+{% endif %}
 </div>
 <div>
 
