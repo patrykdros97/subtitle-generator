@@ -7,7 +7,7 @@ function upload_file(){
     $('#spinner-box').show();
     $.ajax({
         method: 'POST',
-        url:"/wav/",
+        url:"/",
         processData: false,
         contentType: false,
         data: form_data,

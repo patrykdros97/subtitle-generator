@@ -15,6 +15,9 @@ from pydub.silence import split_on_silence
 from django.http.response import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def time_calculator(audio: str, seconds:int, microseconds:int=100000) -> str:
     if isinstance(microseconds, str):
@@ -28,18 +31,17 @@ def time_calculator(audio: str, seconds:int, microseconds:int=100000) -> str:
 def upload_file(request, *args, **kwargs):
     context = {}
     if request.method == 'POST':
+        logger.info('Starting post')
         forms = UploadMediaFileForm(request.POST, request.FILES)
         if forms.is_valid():
-
-            instance = UploadMediaFile(file=request.FILES['file'], title=request.FILES['file'].name, uploaded_at=datetime.now())
-            instance.save()
-            file = UploadMediaFile.objects.filter(title=request.FILES['file'].name)[0]
-            if request.FILES['file'].name.lower().endswith(('.mp3', '.mp4')):
-                file_to_convert = ''.join(file.file.path.split('.')[:-1]) + '.wav'
+            file = request.FILES['file']
+            if file.name.lower().endswith(('.mp3', '.mp4')):
+                file_to_convert = ''.join(file.path.split('.')[:-1]) + '.wav'
                 os.system(f'ffmpeg -i {file.file.path} {file_to_convert}')
                 os.system('y')
             else:
-                file_to_convert = request.FILES['file']
+                file_to_convert = file
+
             context = {'form': forms}
             filepath = handle_uploaded_file(file_to_convert)
             context = {'filepath': filepath}
@@ -47,9 +49,9 @@ def upload_file(request, *args, **kwargs):
 
 def handle_uploaded_file(file, audio_begin:str='00:00:00,500', translator=Translator(), filepath:str='subtitles.txt') -> str:
     r = sr.Recognizer()
-    print('Processing hearing file')
+    logger.info('Processing hearing file')
     sound = AudioSegment.from_wav(file)
-    print('End processing hearing file')
+    logger.info('End processing hearing file')
     chunks = split_on_silence(sound,
         # experiment with this value for your target audio file
         min_silence_len = 1000,
@@ -68,9 +70,9 @@ def handle_uploaded_file(file, audio_begin:str='00:00:00,500', translator=Transl
                 recognize = r.recognize_google(audio_listened)
                 output = translator.translate(text=recognize, dest='pl', src='auto')
                 text += f'{chunk_id}\n{begin} --> {end}\n{output.text}\n\r'
-                print(output.text + '\n')
+                logger.info(output.text + '\n')
             except:
-                print(traceback.format_exc())
+                logger.warning(traceback.format_exc())
             audio_begin = time_calculator(end, seconds=0)
     #return text
     with open(filepath, 'w') as file: file.write(text)

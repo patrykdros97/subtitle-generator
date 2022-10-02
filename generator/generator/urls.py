@@ -19,6 +19,6 @@ from core.views import upload_file, download_file
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('wav/', upload_file, name='wav'),
-    path('wav/download/<filepath>', download_file, name='download')
+    path('', upload_file, name='wav'),
+    path('<filepath>', download_file, name='download')
 ]
