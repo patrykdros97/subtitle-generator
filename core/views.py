@@ -36,9 +36,13 @@ def upload_file(request, *args, **kwargs):
         if forms.is_valid():
             file = request.FILES['file']
             if file.name.lower().endswith(('.mp3', '.mp4')):
-                file_to_convert = ''.join(file.name.split('.')[:-1]) + '.wav'
-                os.system(f'ffmpeg -i {file.name} {file_to_convert}')
-                os.system('y')
+                file_name = 'file' + file.name.split('.')[-1]
+                with open(file_name, 'wb+') as destination:
+                    for chunk in file.chunks():
+                        destination.write(chunk)
+                file_to_convert = 'file.wav'
+                os.system(f"ffmpeg -y -i '{file_name}' {file_to_convert}")
+                os.remove(file_name)
             else:
                 file_to_convert = file
 
