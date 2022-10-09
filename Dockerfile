@@ -7,7 +7,8 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN apt-get -y update\
+RUN apt-get -y clean\
+    && apt-get -y update\
     && apt-get install -y ffmpeg flac
 
 RUN pip install --upgrade pip \
@@ -15,4 +16,4 @@ RUN pip install --upgrade pip \
 
 #CMD ["python", "./generator/manage.py", "runserver"]
 
-CMD gunicorn -b 0.0.0.0:$PORT generator.wsgi:application
+CMD gunicorn --timeout 10000 -b 0.0.0.0:$PORT generator.wsgi:application

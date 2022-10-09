@@ -15,10 +15,6 @@ from pydub.silence import split_on_silence
 from django.http.response import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-import logging
-logger = logging.getLogger(__name__)
-
-
 def time_calculator(audio: str, seconds:int, microseconds:int=100000) -> str:
     if isinstance(microseconds, str):
         len_diff = 6 - len(microseconds)
@@ -31,7 +27,6 @@ def time_calculator(audio: str, seconds:int, microseconds:int=100000) -> str:
 def upload_file(request, *args, **kwargs):
     context = {}
     if request.method == 'POST':
-        logger.info('Starting post')
         forms = UploadMediaFileForm(request.POST, request.FILES)
         if forms.is_valid():
             file = request.FILES['file']
@@ -52,10 +47,9 @@ def upload_file(request, *args, **kwargs):
     return render(request, 'working_page.html', context)
 
 def handle_uploaded_file(file, audio_begin:str='00:00:00,500', translator=Translator(), filepath:str='subtitles.txt') -> str:
-    r = sr.Recognizer()
-    logger.info('Processing hearing file')
+    print('Processing hearing file')
     sound = AudioSegment.from_wav(file)
-    logger.info('End processing hearing file')
+    print('End processing hearing file')
     chunks = split_on_silence(sound,
         # experiment with this value for your target audio file
         min_silence_len = 1000,
@@ -66,6 +60,7 @@ def handle_uploaded_file(file, audio_begin:str='00:00:00,500', translator=Transl
     )
     text = ''
     for chunk_id, chunk in enumerate(chunks, start=1):
+        r = sr.Recognizer()
         with sr.AudioFile(chunk.export(format="wav")) as source:
             begin = audio_begin
             end = time_calculator(begin, *str(chunk.duration_seconds).split('.'))
@@ -74,11 +69,11 @@ def handle_uploaded_file(file, audio_begin:str='00:00:00,500', translator=Transl
                 recognize = r.recognize_google(audio_listened)
                 output = translator.translate(text=recognize, dest='pl', src='auto')
                 text += f'{chunk_id}\n{begin} --> {end}\n{output.text}\n\r'
-                logger.info(output.text + '\n')
             except:
-                logger.warning(traceback.format_exc())
+                print(traceback.format_exc())
             audio_begin = time_calculator(end, seconds=0)
     #return text
+    print('\n\nEnd of processing file')
     with open(filepath, 'w') as file: file.write(text)
     return filepath
 

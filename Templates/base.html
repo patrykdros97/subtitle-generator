@@ -1,8 +1,5 @@
 <!DOCTYPE html>
 {% load static %}
-<link rel="icon" 
-      type="image/png" 
-      href="{% static './img/image2.png'%}">
 <head>
     <title>Subtitles generator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -13,41 +10,11 @@
     <style>
         body,
         html {
-            height: 100%;
-            background-image: url("{% static './img/image2.png'%}");
+            height: 100vh;
+            background-image: url('https://mdbootstrap.com/img/new/fluid/city/018.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
             background-attachment: local;
-        }
-
-        i {
-            color: aquamarine;
-        }
-
-        .main_page_text {
-            text-align: center;
-            font-size: 100px;
-        }
-
-        .selected_page {
-            text-align: center;
-            font-size: 70px;
-        }
-
-        .flex {
-            text-align: center;
-            margin-left: auto;
-            margin-right: auto;
-            margin-top: 100px;
-        }
-
-        .kind_button {
-            margin-top: 15px;
-            background-color: #0066FF;
-            border: 1px solid;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            font-size: 16px;
-            cursor: pointer;
         }
 
         .overlay {
@@ -76,12 +43,12 @@
         }
 
         .spinner {
-            width: 75px;
-            height: 75px;
+            width: 80px;
+            height: 80px;
             display: inline-block;
-            border-width: 2px;
+            border-width: 3px;
             border-color: rgba(255, 255, 255, 0.05);
-            border-top-color: #fff;
+            border-top-color: #1500ff;
             animation: spin 1s infinite linear;
             border-radius: 100%;
             border-style: solid;
@@ -102,7 +69,7 @@
     <div id="spinner-box" class="overlay">
         <div class="overlay__inner">
             <div id='spinner-box-overlay' class="overlay__content">
-                <p style="color: #f0ffff;">Please wait<br>Proceed method</p>
+                <h5 class="mb-4" style="color: #1500ff;">Proceed method, please wait</h5>
                 <span class="spinner"></span>
             </div>
         </div>

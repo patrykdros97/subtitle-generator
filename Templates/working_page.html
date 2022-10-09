@@ -1,26 +1,37 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<p class="selected_page">
-    <big><i>Subtitles Generator</i></big>
-</p>
-<div class="flex">
-    {% csrf_token %}
-    <form id="form-flex" method="POST" action='.' enctype="multipart/form-data" class="dropzone">
-        <input id='file' type="file" name="file" placeholder="Choose file" style="color: #f0ffff;" VALUE="Refresh">
-        <button type="submit" onclick=upload_file();>Upload File</button>
-    </form>
+<div class="mask" style="background-color: rgba(0, 0, 0, 0.7);">
+    <div class="d-flex justify-content-center align-items-center h-100">
+        <div class="text-white">
+            <h1 class="mb-3">Subtitles Generator</h1>
+            <h5 class="mb-4">Choose file from which you want to obtain subtitles</h5>
+            {% csrf_token %}
+            <form id="form-flex" method="POST" action='.' enctype="multipart/form-data" class="dropzone">
+                <input id='file' type="file" name="file" placeholder="Choose file" style="color: #f0ffff;" VALUE="Refresh" class="btn btn-outline-light btn-lg m-2">
+                <button type="submit" onclick=upload_file(); class="btn btn-outline-light btn-lg m-2">Upload File</button>
+            </form>
+        </div>
+    </div>
+</div>
 {% if filepath %}
-<div class="flex">
-    <p>
-        <a href="{{filepath}}">Download TXT</a>
-    </p>
+<div class="mask" style="background-color: rgba(0, 0, 0, 0.7);">
+    <div class="d-flex justify-content-center align-items-center h-100">
+        <div class="text-white">
+            <a
+                class="btn btn-outline-light btn-lg m-2"
+                href="{{filepath}}"
+                role="button"
+                rel="nofollow"
+                target="_blank"
+            >Download TXT</a
+            >
+        </div>
+    </div>
 </div>
-
-{% endif %}
-</div>
+{% else %}
 <div>
 
 </div>
-
+{% endif %}
 {% endblock content %}
