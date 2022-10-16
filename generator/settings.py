@@ -25,7 +25,7 @@ STATIC_DIR = os.path.join(BASE_DIR, 'static')
 SECRET_KEY = 'django-insecure-joskv!5h+*(i%6php76ecj62o$durh7^3_xk(j8^38xceb3)wa'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True if not os.getenv('Production') else False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'movie-subtitle-generator.herokuapp.com']
 

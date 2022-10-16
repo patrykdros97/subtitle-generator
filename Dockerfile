@@ -2,6 +2,8 @@ FROM python:3
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ARG var_name 
+ENV env_var_name=$var_name
 
 WORKDIR /usr/src/app
 
